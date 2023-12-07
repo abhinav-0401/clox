@@ -4,6 +4,7 @@
 #include "includes/chunk.h"
 #include "includes/value.h"
 #include "includes/compiler.h"
+#include "includes/debug.h"
 
 VM vm;
 
@@ -82,6 +83,21 @@ static InterpretResult run() {
 }
 
 InterpretResult interpret(const char* src) {
-    compile(src);
-    return INTERPRET_OK;
+    Chunk chunk;
+    init_chunk(&chunk);
+
+    if(!compile(src, &chunk)) {
+        free_chunk(&chunk);
+        return INTERPRET_COMPILE_ERR;
+    }    
+
+    disassemble_chunk(&chunk, "Expression Chunk");
+
+    vm.chunk = &chunk;
+    vm.ip = vm.chunk->code;
+
+    InterpretResult result = run();
+
+    free_chunk(&chunk);
+    return result;
 }
