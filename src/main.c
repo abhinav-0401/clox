@@ -86,19 +86,19 @@ static void test_chunk() {
     Chunk chunk;
     init_chunk(&chunk);
 
-    int new_const = add_constant(&chunk, 5);
+    int new_const = add_constant(&chunk, NUMBER_VAL(5));
     write_chunk(&chunk, OP_CONSTANT);
     write_chunk(&chunk, new_const);
 
     write_chunk(&chunk, OP_NEGATE);
 
-    int constant = add_constant(&chunk, 3);
+    int constant = add_constant(&chunk, NUMBER_VAL(3));
     write_chunk(&chunk, OP_CONSTANT);
     write_chunk(&chunk, constant);
 
     write_chunk(&chunk, OP_ADD);
 
-    constant = add_constant(&chunk, 10);
+    constant = add_constant(&chunk, NUMBER_VAL(10));
     write_chunk(&chunk, OP_CONSTANT);
     write_chunk(&chunk, constant);
 
