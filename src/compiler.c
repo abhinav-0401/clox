@@ -77,13 +77,13 @@ ParseRule rules[] = {
     [TOKEN_SEMICOLON] = {NULL, NULL, PREC_NONE},
     [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
-    [TOKEN_BANG] = {NULL, NULL, PREC_NONE},
+    [TOKEN_BANG] = {unary, NULL, PREC_TERM},
     [TOKEN_BANG_EQUAL] = {NULL, NULL, PREC_NONE},
     [TOKEN_EQUAL] = {NULL, NULL, PREC_NONE},
-    [TOKEN_EQUAL_EQUAL] = {NULL, NULL, PREC_NONE},
-    [TOKEN_GREATER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_EQUAL_EQUAL] = {NULL, binary, PREC_EQUALITY},
+    [TOKEN_GREATER] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_GREATER_EQUAL] = {NULL, NULL, PREC_NONE},
-    [TOKEN_LESS] = {NULL, NULL, PREC_NONE},
+    [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS_EQUAL] = {NULL, NULL, PREC_NONE},
     [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
     [TOKEN_STRING] = {NULL, NULL, PREC_NONE},
@@ -150,6 +150,7 @@ static void unary() {
     parse_precedence(PREC_UNARY);
     switch(operator_type) {
         case TOKEN_MINUS: { emit_byte(OP_NEGATE); break; }
+        case TOKEN_BANG: { emit_byte(OP_NOT); break; }
         default: return;
     }
 }
@@ -164,6 +165,9 @@ static void binary() {
         case TOKEN_MINUS: { emit_byte(OP_SUBTRACT); break; }
         case TOKEN_STAR: { emit_byte(OP_MULTIPLY); break; }
         case TOKEN_SLASH: { emit_byte(OP_DIVIDE); break; }
+        case TOKEN_EQUAL_EQUAL: { emit_byte(OP_EQUAL); break; }
+        case TOKEN_GREATER: { emit_byte(OP_GREATER); break; }
+        case TOKEN_LESS: { emit_byte(OP_LESS); break; }
         default: return;
     }
 }
