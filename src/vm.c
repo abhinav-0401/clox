@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "includes/vm.h"
 #include "includes/chunk.h"
 #include "includes/value.h"
 #include "includes/compiler.h"
 #include "includes/debug.h"
+#include "includes/object.h"
+#include "includes/memory.h"
 
 VM vm;
 
@@ -51,6 +54,20 @@ static bool is_falsey(Value value) {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value)) || (IS_NUMBER(value) && (AS_NUMBER(value) == 0));
 }
 
+static void concatenate() {
+    ObjString* b = AS_STRING(pop());
+    ObjString* a = AS_STRING(pop());
+
+    int length = a->length + b->length;
+    char* chars = ALLOCATE(char, length + 1);
+    memcpy(chars, a->chars, a->length);
+    memcpy(chars + a->length, b->chars, b->length);
+    chars[length] = '\0';
+
+    ObjString* result = take_string(chars, length);
+    push(OBJ_VAL(result));
+}
+
 static bool values_equal(Value a, Value b) {
     if (a.type != b.type) { return false; }
     switch (a.type) {
@@ -77,6 +94,7 @@ static InterpretResult run() {
 
     for(;;) {
         uint8_t instruction = READ_BYTE();
+
         switch (instruction) {
             case OP_RETURN: {
                 print_value(pop());
@@ -104,7 +122,18 @@ static InterpretResult run() {
                 break;
             }
             case OP_ADD: {
-                BINARY_OP(NUMBER_VAL, +);
+                if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+                    concatenate();
+                }
+                else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
+                    double b = AS_NUMBER(pop());
+                    double a = AS_NUMBER(pop());
+                    push(NUMBER_VAL(a + b));
+                }
+                else {
+                    runtime_error("Operands must be two numbers or two strings.");
+                    return INTERPRET_RUNTIME_ERR;
+                }
                 break;
             }
             case OP_SUBTRACT: {

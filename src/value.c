@@ -3,6 +3,7 @@
 
 #include "includes/value.h"
 #include "includes/memory.h"
+#include "includes/object.h"
 
 void init_value_arr(ValueArr* arr) {
     arr->count = 0;
@@ -38,6 +39,10 @@ void print_value(Value value) {
         }
         case VAL_NIL: {
             printf("nil");
+            break;
+        }
+        case VAL_OBJ: {
+            print_obj(value);
             break;
         }
     }
